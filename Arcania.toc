@@ -1,0 +1,6 @@
+## Interface: 11401
+## Title: Arcania
+## Author: Zaele
+## Version: 1.0
+
+Arcania.lua
