@@ -5,6 +5,7 @@
 --
 
 --[[
+only dim on low mana (not energy or rage or ...)
 ]]
 
 --
@@ -36,45 +37,6 @@ lua supports inner functions
 - #t returns the vector part length
 - t.a is syntactic sugar for t["a"]
 - specId, specName = expr for multiple values
-]]
-
---
---- Config
---
-
---[[
-ArcaniaPlayerFrame = "PlayerFrame"
-ArcaniaTargetFrame = "TargetFrame"
-ArcaniaMemberFrame = "PartyMemberFrame"
-
-ArcaniaFriendlyFrames = {
-	"BT4Bar1",
-	"BT4Bar5",
-	"BT4Bar6",
-	"BuffFrame"}
-
-ArcaniaRangeButton = "BT4Button20"
-
-ArcaniaCooldowns = {
-	{"BT4Button16Cooldown", "Fire Blast"},
-	{"BT4Button110Cooldown", "Frost Nova"}}
-]]
-
---[[
-ArcaniaPlayerFrame = "LUFUnitplayer"
-ArcaniaTargetFrame = "LUFUnittarget"
-ArcaniaMemberFrame = "LUFHeaderpartyUnitButton"
-
-ArcaniaFriendlyFrames = {
-	"BT4Bar1",
-	"BT4Bar5",
-	"BT4Bar6"}
-
-ArcaniaRangeButton = "BT4Button20"
-
-ArcaniaCooldowns = {
-	{"BT4Button24Cooldown", "Fire Blast"},
-	{"BT4Button109Cooldown", "Frost Nova"}}
 ]]
 
 --
