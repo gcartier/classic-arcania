@@ -5,7 +5,9 @@
 --
 
 --[[
-only dim on low mana (not energy or rage or ...)
+- only dim on low mana (not energy or rage or ...)
+- in friendly mode i could disable the hidding the
+  off cooldown icons so they can be moved around
 ]]
 
 --
@@ -38,6 +40,29 @@ lua supports inner functions
 - t.a is syntactic sugar for t["a"]
 - specId, specName = expr for multiple values
 ]]
+
+--
+--- Variables
+--
+
+--[[
+ArcaniaPlayerFrame = "framename"
+ArcaniaTargetFrame = "framename"
+ArcaniaMemberFrame = "framename"
+ArcaniaFriendlyFrames = {
+	"framename",
+	...
+}
+ArcaniaRangeButton = "buttonname"
+ArcaniaCooldowns = {
+	{
+		"btcooldown",
+		"spellname"
+	},
+	...
+}
+]]
+
 
 --
 --- Wellness
@@ -195,6 +220,12 @@ local function PlayerEvent(self, event, ...)
 	if (event == "ADDON_LOADED") then
 		local name = ...
 		if (name == "Arcania") then
+			if (not ArcaniaFriendlyFrames) then
+				ArcaniaFriendlyFrames = {}
+			end
+			if (not ArcaniaCooldowns) then
+				ArcaniaCooldowns = {}
+			end
 		end
 	elseif (event == "PLAYER_ENTERING_WORLD") then
 		Minimap:Hide()
