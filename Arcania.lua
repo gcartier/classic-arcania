@@ -5,12 +5,6 @@
 --
 
 --[[
-BuffFrame
-
-fix flicker when drinking after oom
-
-maybe show the frostbolt icon when an ennemy
-target that is out-of-distance is selected!?
 ]]
 
 --
@@ -53,38 +47,75 @@ local ArcaniaPlayerFrame = "PlayerFrame"
 local ArcaniaTargetFrame = "TargetFrame"
 local ArcaniaMemberFrame = "PartyMemberFrame"
 
+-- local ArcaniaRange = "BT4Button20"
+
 local ArcaniaCooldowns = {
 	{"BT4Button16Cooldown", "Fire Blast"},
 	{"BT4Button110Cooldown", "Frost Nova"}}
+
+local ArcaniaFriendly = {
+	"BT4Bar1",
+	"BT4Bar5",
+	"BT4Bar6",
+	"BuffFrame"}
 ]]
 
 local ArcaniaPlayerFrame = "LUFUnitplayer"
 local ArcaniaTargetFrame = "LUFUnittarget"
 local ArcaniaMemberFrame = "LUFHeaderpartyUnitButton"
 
+local ArcaniaRange = "BT4Button20"
+
 local ArcaniaCooldowns = {
 	{"BT4Button24Cooldown", "Fire Blast"},
 	{"BT4Button109Cooldown", "Frost Nova"}}
+
+local ArcaniaFriendly = {
+	"BT4Bar1",
+	"BT4Bar5",
+	"BT4Bar6"}
 
 --
 --- Wellness
 --
 
 local function UpdateWellness(unit, framename)
-	local healthMax = UnitHealthMax(unit)
-	local health = UnitHealth(unit)
-	local healthAlpha = (healthMax - health) / healthMax
-	
-	local powerMax = UnitPowerMax(unit)
-	local power = UnitPower(unit)
-	local powerAlpha = (powerMax - power) / powerMax
-	
-	local wellnessAlpha = math.max(healthAlpha, powerAlpha)
-
-	frame = getglobal(framename)
 	-- some frames are created lazily
+	local frame = getglobal(framename)
 	if (frame) then
-	  	frame:SetAlpha(wellnessAlpha)
+		if (UnitExists("target") and UnitIsFriend("player","target")) then
+			frame:SetAlpha(1)
+			if (unit == "player") then
+				for index, name in ipairs(ArcaniaFriendly) do
+					local frame = getglobal(name)
+					if (frame) then
+						frame:SetAlpha(1)
+					end
+				end
+				Minimap:Show()
+			end
+		else
+			local healthMax = UnitHealthMax(unit)
+			local health = UnitHealth(unit)
+			local healthAlpha = (healthMax - health) / healthMax
+	
+			local powerMax = UnitPowerMax(unit)
+			local power = UnitPower(unit)
+			local powerAlpha = (powerMax - power) / powerMax
+	
+			local wellnessAlpha = math.max(healthAlpha, powerAlpha)
+
+			frame:SetAlpha(wellnessAlpha)
+			if (unit == "player") then
+				for index, name in ipairs(ArcaniaFriendly) do
+					local frame = getglobal(name)
+					if (frame) then
+						frame:SetAlpha(0)
+					end
+				end
+				Minimap:Hide()
+			end
+		end
 	end
 end
 
@@ -105,6 +136,18 @@ local function RegisterWellness(unit, framename)
 	wellnessFrame.framename = framename
 	wellnessFrames[unit] = wellnessFrame
 	UpdateWellness(unit, framename)
+end
+
+local function UpdatePartyWellness()
+	local num = GetNumGroupMembers()
+	if (num > 0) then
+		for i = 1, num - 1 do
+			local unit = "party"..i
+			if (wellnessFrames[unit]) then
+				UpdateWellness(unit, ArcaniaMemberFrame..i)
+			end
+		end
+	end
 end
 
 local function RegisterPartyWellness()
@@ -149,19 +192,34 @@ end
 --
 
 local function CheckDistance()
+	local range = nil
+	if (ArcaniaRange) then
+		range = getglobal(ArcaniaRange)
+	end
+	
 	if (UnitExists("target")) then
 		if (not UnitIsFriend("player","target")) then
 			if (IsSpellInRange("Fire Blast", "target") == 1) then
 				getglobal(ArcaniaTargetFrame):SetAlpha(0)
+				if (range) then
+					range:SetAlpha(0)
+				end
 			else
 				getglobal(ArcaniaTargetFrame):SetAlpha(1)
+				if (range) then
+					range:SetAlpha(1)
+				end
 			end
 		else
-			getglobal(ArcaniaPlayerFrame):SetAlpha(1)
 			getglobal(ArcaniaTargetFrame):SetAlpha(1)
+			if (range) then
+				range:SetAlpha(0)
+			end
 		end
 	else
-		UpdateWellness("player", ArcaniaPlayerFrame)
+		if (range) then
+			range:SetAlpha(0)
+		end
 	end
 end
 
@@ -177,6 +235,7 @@ local function PlayerEvent(self, event, ...)
 		RegisterPartyWellness()
 	elseif (event == "PLAYER_TARGET_CHANGED") then
 		UpdateWellness("player", ArcaniaPlayerFrame)
+		UpdatePartyWellness()
 	elseif (event == "GROUP_ROSTER_UPDATE") then
 		RegisterPartyWellness()
 	end
