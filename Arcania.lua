@@ -5,6 +5,8 @@
 --
 
 --[[
+BuffFrame
+
 fix flicker when drinking after oom
 
 maybe show the frostbolt icon when an ennemy
@@ -43,6 +45,28 @@ lua supports inner functions
 ]]
 
 --
+--- Config
+--
+
+--[[
+local ArcaniaPlayerFrame = "PlayerFrame"
+local ArcaniaTargetFrame = "TargetFrame"
+local ArcaniaMemberFrame = "PartyMemberFrame"
+
+local ArcaniaCooldowns = {
+	{"BT4Button16Cooldown", "Fire Blast"},
+	{"BT4Button110Cooldown", "Frost Nova"}}
+]]
+
+local ArcaniaPlayerFrame = "LUFUnitplayer"
+local ArcaniaTargetFrame = "LUFUnittarget"
+local ArcaniaMemberFrame = "LUFHeaderpartyUnitButton"
+
+local ArcaniaCooldowns = {
+	{"BT4Button24Cooldown", "Fire Blast"},
+	{"BT4Button109Cooldown", "Frost Nova"}}
+
+--
 --- Wellness
 --
 
@@ -58,7 +82,7 @@ local function UpdateWellness(unit, framename)
 	local wellnessAlpha = math.max(healthAlpha, powerAlpha)
 
 	frame = getglobal(framename)
-	-- quicky to fix
+	-- some frames are created lazily
 	if (frame) then
 	  	frame:SetAlpha(wellnessAlpha)
 	end
@@ -89,7 +113,7 @@ local function RegisterPartyWellness()
 		for i = 1, num - 1 do
 			local unit = "party"..i
 			if (not wellnessFrames[unit]) then
-				RegisterWellness(unit, "LUFHeaderpartyUnitButton"..i)
+				RegisterWellness(unit, ArcaniaMemberFrame..i)
 			end
 		end
 	end
@@ -99,10 +123,7 @@ end
 --- Cooldown
 --
 
-local FireBlast = 2137
-local FrostNova = 122
-
-local function WatchCooldown(cooldown, spell)
+local function UpdateCooldown(cooldown, spell)
 	local start, duration, enabled = GetSpellCooldown(spell)
 	local button = cooldown:GetParent()
 	if (duration < 2.0 or cooldown:GetCooldownDuration() == 0) then
@@ -113,11 +134,13 @@ local function WatchCooldown(cooldown, spell)
 end
 
 local function MonitorCooldowns()
-	if (BT4Button24Cooldown) then
-		WatchCooldown(BT4Button24Cooldown, FireBlast)
-	end
-	if (BT4Button109Cooldown) then
-		WatchCooldown(BT4Button109Cooldown, FrostNova)
+	for index, cooldown in ipairs(ArcaniaCooldowns) do
+		local name = cooldown[1]
+		local spell = cooldown[2]
+		local button = getglobal(name)
+		if (button) then
+			UpdateCooldown(button, spell)
+		end
 	end
 end
 
@@ -129,16 +152,16 @@ local function CheckDistance()
 	if (UnitExists("target")) then
 		if (not UnitIsFriend("player","target")) then
 			if (IsSpellInRange("Fire Blast", "target") == 1) then
-				LUFUnittarget:SetAlpha(0)
+				getglobal(ArcaniaTargetFrame):SetAlpha(0)
 			else
-				LUFUnittarget:SetAlpha(1)
+				getglobal(ArcaniaTargetFrame):SetAlpha(1)
 			end
 		else
-			LUFUnitplayer:SetAlpha(1)
-			LUFUnittarget:SetAlpha(1)
+			getglobal(ArcaniaPlayerFrame):SetAlpha(1)
+			getglobal(ArcaniaTargetFrame):SetAlpha(1)
 		end
 	else
-		UpdateWellness("player", "LUFUnitplayer")
+		UpdateWellness("player", ArcaniaPlayerFrame)
 	end
 end
 
@@ -149,8 +172,11 @@ end
 local function PlayerEvent(self, event, ...)
 	if (event == "PLAYER_ENTERING_WORLD") then
 		Minimap:Hide()
-		RegisterWellness("player", "LUFUnitplayer")
+		CompactRaidFrameManager:Hide()
+		RegisterWellness("player", ArcaniaPlayerFrame)
 		RegisterPartyWellness()
+	elseif (event == "PLAYER_TARGET_CHANGED") then
+		UpdateWellness("player", ArcaniaPlayerFrame)
 	elseif (event == "GROUP_ROSTER_UPDATE") then
 		RegisterPartyWellness()
 	end
