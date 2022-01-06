@@ -43,37 +43,39 @@ lua supports inner functions
 --
 
 --[[
-local ArcaniaPlayerFrame = "PlayerFrame"
-local ArcaniaTargetFrame = "TargetFrame"
-local ArcaniaMemberFrame = "PartyMemberFrame"
+ArcaniaPlayerFrame = "PlayerFrame"
+ArcaniaTargetFrame = "TargetFrame"
+ArcaniaMemberFrame = "PartyMemberFrame"
 
--- local ArcaniaRange = "BT4Button20"
-
-local ArcaniaCooldowns = {
-	{"BT4Button16Cooldown", "Fire Blast"},
-	{"BT4Button110Cooldown", "Frost Nova"}}
-
-local ArcaniaFriendly = {
+ArcaniaFriendlyFrames = {
 	"BT4Bar1",
 	"BT4Bar5",
 	"BT4Bar6",
 	"BuffFrame"}
+
+ArcaniaRangeButton = "BT4Button20"
+
+ArcaniaCooldowns = {
+	{"BT4Button16Cooldown", "Fire Blast"},
+	{"BT4Button110Cooldown", "Frost Nova"}}
 ]]
 
-local ArcaniaPlayerFrame = "LUFUnitplayer"
-local ArcaniaTargetFrame = "LUFUnittarget"
-local ArcaniaMemberFrame = "LUFHeaderpartyUnitButton"
+--[[
+ArcaniaPlayerFrame = "LUFUnitplayer"
+ArcaniaTargetFrame = "LUFUnittarget"
+ArcaniaMemberFrame = "LUFHeaderpartyUnitButton"
 
-local ArcaniaRange = "BT4Button20"
-
-local ArcaniaCooldowns = {
-	{"BT4Button24Cooldown", "Fire Blast"},
-	{"BT4Button109Cooldown", "Frost Nova"}}
-
-local ArcaniaFriendly = {
+ArcaniaFriendlyFrames = {
 	"BT4Bar1",
 	"BT4Bar5",
 	"BT4Bar6"}
+
+ArcaniaRangeButton = "BT4Button20"
+
+ArcaniaCooldowns = {
+	{"BT4Button24Cooldown", "Fire Blast"},
+	{"BT4Button109Cooldown", "Frost Nova"}}
+]]
 
 --
 --- Wellness
@@ -86,7 +88,7 @@ local function UpdateWellness(unit, framename)
 		if (UnitExists("target") and UnitIsFriend("player","target")) then
 			frame:SetAlpha(1)
 			if (unit == "player") then
-				for index, name in ipairs(ArcaniaFriendly) do
+				for index, name in ipairs(ArcaniaFriendlyFrames) do
 					local frame = getglobal(name)
 					if (frame) then
 						frame:SetAlpha(1)
@@ -107,7 +109,7 @@ local function UpdateWellness(unit, framename)
 
 			frame:SetAlpha(wellnessAlpha)
 			if (unit == "player") then
-				for index, name in ipairs(ArcaniaFriendly) do
+				for index, name in ipairs(ArcaniaFriendlyFrames) do
 					local frame = getglobal(name)
 					if (frame) then
 						frame:SetAlpha(0)
@@ -193,8 +195,8 @@ end
 
 local function CheckDistance()
 	local range = nil
-	if (ArcaniaRange) then
-		range = getglobal(ArcaniaRange)
+	if (ArcaniaRangeButton) then
+		range = getglobal(ArcaniaRangeButton)
 	end
 	
 	if (UnitExists("target")) then
@@ -228,7 +230,11 @@ end
 --
 
 local function PlayerEvent(self, event, ...)
-	if (event == "PLAYER_ENTERING_WORLD") then
+	if (event == "ADDON_LOADED") then
+		local name = ...
+		if (name == "Arcania") then
+		end
+	elseif (event == "PLAYER_ENTERING_WORLD") then
 		Minimap:Hide()
 		CompactRaidFrameManager:Hide()
 		RegisterWellness("player", ArcaniaPlayerFrame)
@@ -267,6 +273,7 @@ local updateFrame = CreateFrame("frame")
 updateFrame:SetScript("OnUpdate", Update)
 
 local playerFrame = CreateFrame("frame")
+playerFrame:RegisterEvent("ADDON_LOADED")
 playerFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 playerFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 playerFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
