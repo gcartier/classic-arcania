@@ -81,6 +81,7 @@ local function UpdateWellness(unit, framename)
 						frame:SetAlpha(1)
 					end
 				end
+				MainMenuExpBar:Show()
 				Minimap:Show()
 			end
 		else
@@ -106,6 +107,7 @@ local function UpdateWellness(unit, framename)
 						frame:SetAlpha(0)
 					end
 				end
+				MainMenuExpBar:Hide()
 				Minimap:Hide()
 			else
 				frame:SetAlpha(.2 + wellnessAlpha * .8)
@@ -239,6 +241,7 @@ local function PlayerEvent(self, event, ...)
 		end
 	elseif (event == "PLAYER_ENTERING_WORLD") then
 		Minimap:Hide()
+		C_Timer.After(5, function() MainMenuExpBar:Hide() end)
 		CompactRaidFrameManager:Hide()
 		RegisterWellness("player", ArcaniaPlayerFrame)
 		RegisterPartyWellness()
@@ -247,6 +250,10 @@ local function PlayerEvent(self, event, ...)
 		UpdatePartyWellness()
 	elseif (event == "GROUP_ROSTER_UPDATE") then
 		RegisterPartyWellness()
+	elseif (event == "QUEST_DETAIL") then
+		MainMenuExpBar:Show()
+	elseif (event == "QUEST_FINISHED") then
+		MainMenuExpBar:Hide()
 	end
 
 	MonitorCooldowns()
@@ -282,6 +289,8 @@ playerFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 playerFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
 playerFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
 playerFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+playerFrame:RegisterEvent("QUEST_DETAIL")
+playerFrame:RegisterEvent("QUEST_FINISHED")
 playerFrame:SetScript("OnEvent", PlayerEvent)
 
 --
