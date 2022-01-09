@@ -202,12 +202,16 @@ local function CheckDistance()
 			else
 				getglobal(ArcaniaTargetFrame):SetAlpha(1)
 				if (range) then
-					range:SetAlpha(1)
+					if (UnitIsDeadOrGhost("target")) then
+						range:SetAlpha(0)
+					else
+						range:SetAlpha(1)
+					end
 				end
 			end
 		else
 			getglobal(ArcaniaTargetFrame):SetAlpha(1)
-			if (range) then
+			if (range or UnitIsDeadOrGhost("target")) then
 				range:SetAlpha(0)
 			end
 		end
