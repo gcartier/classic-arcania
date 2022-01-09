@@ -102,6 +102,12 @@ local function UpdateWellness(unit, framename)
 			end
 
 			if (unit == "player") then
+				if (UnitExists("pet")) then
+					local petHealthMax = UnitHealthMax("pet")
+					local petHealth = UnitHealth("pet")
+					local petHealthAlpha = (petHealthMax - petHealth) / petHealthMax
+					wellnessAlpha = math.max(wellnessAlpha, petHealthAlpha)
+				end
 				frame:SetAlpha(wellnessAlpha)
 				for index, name in ipairs(ArcaniaFriendlyFrames) do
 					local frame = getglobal(name)
