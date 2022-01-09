@@ -98,8 +98,8 @@ local function UpdateWellness(unit, framename)
 				wellnessAlpha = healthAlpha
 			end
 
-			frame:SetAlpha(wellnessAlpha)
 			if (unit == "player") then
+				frame:SetAlpha(wellnessAlpha)
 				for index, name in ipairs(ArcaniaFriendlyFrames) do
 					local frame = getglobal(name)
 					if (frame) then
@@ -107,6 +107,8 @@ local function UpdateWellness(unit, framename)
 					end
 				end
 				Minimap:Hide()
+			else
+				frame:SetAlpha(.2 + wellnessAlpha * .8)
 			end
 		end
 	end
