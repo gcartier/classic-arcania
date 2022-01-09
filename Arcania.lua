@@ -88,11 +88,15 @@ local function UpdateWellness(unit, framename)
 			local health = UnitHealth(unit)
 			local healthAlpha = (healthMax - health) / healthMax
 	
-			local powerMax = UnitPowerMax(unit)
-			local power = UnitPower(unit)
-			local powerAlpha = (powerMax - power) / powerMax
-	
-			local wellnessAlpha = math.max(healthAlpha, powerAlpha)
+			local wellnessAlpha
+			if (UnitPowerType(unit) == 0) then
+				local powerMax = UnitPowerMax(unit)
+				local power = UnitPower(unit)
+				local powerAlpha = (powerMax - power) / powerMax
+				wellnessAlpha = math.max(healthAlpha, powerAlpha)
+			else
+				wellnessAlpha = healthAlpha
+			end
 
 			frame:SetAlpha(wellnessAlpha)
 			if (unit == "player") then
