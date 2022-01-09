@@ -5,9 +5,10 @@
 --
 
 --[[
-- only dim on low mana (not energy or rage or ...)
 - in friendly mode i could disable the hidding the
   off cooldown icons so they can be moved around
+- small delay for hiding the xp bar on quest complete
+- include details in it somehow
 ]]
 
 --
@@ -237,6 +238,15 @@ local function PlayerEvent(self, event, ...)
 	if (event == "ADDON_LOADED") then
 		local name = ...
 		if (name == "Arcania") then
+			if (not ArcaniaPlayerFrame) then
+				ArcaniaPlayerFrame = "PlayerFrame"
+			end
+			if (not ArcaniaTargetFrame) then
+				ArcaniaTargetFrame = "TargetFrame"
+			end
+			if (not ArcaniaMemberFrame) then
+				ArcaniaMemberFrame = "PartyMemberFrame"
+			end
 			if (not ArcaniaFriendlyFrames) then
 				ArcaniaFriendlyFrames = {}
 			end
