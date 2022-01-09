@@ -197,7 +197,12 @@ local function CheckDistance()
 	if (UnitExists("target")) then
 		if (not UnitIsFriend("player","target")) then
 			if (IsSpellInRange("Fire Blast", "target") == 1) then
-				getglobal(ArcaniaTargetFrame):SetAlpha(0)
+				local classif = UnitClassification("target")
+				if (classif == "worldboss" or classif == "rareelite" or classif == "elite" or classif == "rare") then
+					getglobal(ArcaniaTargetFrame):SetAlpha(1)
+				else
+					getglobal(ArcaniaTargetFrame):SetAlpha(0)
+				end
 				if (range) then
 					range:SetAlpha(0)
 				end
