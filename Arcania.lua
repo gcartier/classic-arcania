@@ -5,8 +5,6 @@
 --
 
 --[[
-- in friendly mode i could disable the hidding the
-  off cooldown icons so they can be moved around
 - small delay for hiding the xp bar on quest complete
 - include details in it somehow
 ]]
@@ -64,6 +62,7 @@ ArcaniaCooldowns = {
 }
 ]]
 
+local FriendlyTarget = false
 
 --
 --- Wellness
@@ -74,6 +73,7 @@ local function UpdateWellness(unit, framename)
 	local frame = getglobal(framename)
 	if (frame) then
 		if (UnitExists("target") and UnitIsFriend("player","target")) then
+			FriendlyTarget = true
 			frame:SetAlpha(1)
 			if (unit == "player") then
 				for index, name in ipairs(ArcaniaFriendlyFrames) do
@@ -86,6 +86,7 @@ local function UpdateWellness(unit, framename)
 				Minimap:Show()
 			end
 		else
+			FriendlyTarget = false
 			local healthMax = UnitHealthMax(unit)
 			local health = UnitHealth(unit)
 			local healthAlpha = (healthMax - health) / healthMax
@@ -167,7 +168,9 @@ end
 local function UpdateCooldown(cooldown, spell)
 	local start, duration, enabled = GetSpellCooldown(spell)
 	local button = cooldown:GetParent()
-	if (duration < 2.0 or cooldown:GetCooldownDuration() == 0) then
+	if (FriendlyTarget) then
+		button:SetAlpha(1)
+	elseif (duration < 2.0 or cooldown:GetCooldownDuration() == 0) then
 		button:SetAlpha(0)
 	else
 		button:SetAlpha(1)
@@ -197,6 +200,7 @@ local function CheckDistance()
 	
 	if (UnitExists("target")) then
 		if (not UnitIsFriend("player","target")) then
+			FriendlyTarget = false
 			if (IsSpellInRange("Fire Blast", "target") == 1) then
 				local classif = UnitClassification("target")
 				if (classif == "worldboss" or classif == "rareelite" or classif == "elite" or classif == "rare") then
@@ -218,12 +222,14 @@ local function CheckDistance()
 				end
 			end
 		else
+			FriendlyTarget = true
 			getglobal(ArcaniaTargetFrame):SetAlpha(1)
 			if (range or UnitIsDeadOrGhost("target")) then
 				range:SetAlpha(0)
 			end
 		end
 	else
+		FriendlyTarget = false
 		if (range) then
 			range:SetAlpha(0)
 		end
