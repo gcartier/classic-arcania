@@ -45,6 +45,23 @@ lua supports inner functions
 ]]
 
 --
+--- Version
+--
+
+local WoWClassic = false
+local WoWTBC = false
+local WoWRetail = false
+local WoWVersion = select(4, GetBuildInfo())
+
+if WoWVersion < 20000 then
+	WoWClassic = true
+elseif WoWVersion < 30000 then 
+	WoWTBC = true
+else
+	WoWRetail = true
+end
+
+--
 --- Variables
 --
 
@@ -310,19 +327,21 @@ end
 -- Frame
 --
 
-local updateFrame = CreateFrame("frame")
-updateFrame:SetScript("OnUpdate", Update)
+if (not WoWRetail) then
+	local updateFrame = CreateFrame("frame")
+	updateFrame:SetScript("OnUpdate", Update)
 
-local playerFrame = CreateFrame("frame")
-playerFrame:RegisterEvent("ADDON_LOADED")
-playerFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-playerFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-playerFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
-playerFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
-playerFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
-playerFrame:RegisterEvent("QUEST_DETAIL")
-playerFrame:RegisterEvent("QUEST_FINISHED")
-playerFrame:SetScript("OnEvent", PlayerEvent)
+	local playerFrame = CreateFrame("frame")
+	playerFrame:RegisterEvent("ADDON_LOADED")
+	playerFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+	playerFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+	playerFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+	playerFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
+	playerFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+	playerFrame:RegisterEvent("QUEST_DETAIL")
+	playerFrame:RegisterEvent("QUEST_FINISHED")
+	playerFrame:SetScript("OnEvent", PlayerEvent)
+end
 
 --
 -- Slash
@@ -348,4 +367,10 @@ end
 -- Welcome
 --
 
-print('Arcania ready!')
+if (WoWClassic) then
+	print('Arcania Classic ready!')
+elseif (WoWTBC) then
+	print('Arcania TBC ready!')
+else
+	print("Arcania not yet supported in Retail")
+end
