@@ -7,6 +7,10 @@
 --[[
 - small delay for hiding the xp bar on quest complete
 - include details in it somehow
+- find the right way to show bar 2 and 10 in friendly
+- find the right way to implement friendly target
+- review the pet wellness code
+- pet bar
 ]]
 
 --
