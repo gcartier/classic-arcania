@@ -292,6 +292,7 @@ local function PlayerEvent(self, event, ...)
 		C_Timer.After(5, function() MainMenuExpBar:Hide() end)
 		CompactRaidFrameManager:Hide()
 		RegisterWellness("player", ArcaniaPlayerFrame)
+		RegisterWellness("pet", ArcaniaPlayerFrame)
 		RegisterPartyWellness()
 	elseif (event == "PLAYER_TARGET_CHANGED") then
 		UpdateWellness("player", ArcaniaPlayerFrame)
