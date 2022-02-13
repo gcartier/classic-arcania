@@ -291,19 +291,19 @@ local function PlayerEvent(self, event, ...)
 	if (event == "ADDON_LOADED") then
 		local name = ...
 		if (name == "Arcania") then
-			if (not ArcaniaPlayerFrame) then
+			if (ArcaniaPlayerFrame == nil) then
 				ArcaniaPlayerFrame = "PlayerFrame"
 			end
-			if (not ArcaniaTargetFrame) then
+			if (ArcaniaTargetFrame == nil) then
 				ArcaniaTargetFrame = "TargetFrame"
 			end
-			if (not ArcaniaMemberFrame) then
+			if (ArcaniaMemberFrame == nil) then
 				ArcaniaMemberFrame = "PartyMemberFrame"
 			end
-			if (not ArcaniaFriendlyFrames) then
+			if (ArcaniaFriendlyFrames == nil) then
 				ArcaniaFriendlyFrames = {}
 			end
-			if (not ArcaniaCooldowns) then
+			if (ArcaniaCooldowns == nil) then
 				ArcaniaCooldowns = {}
 			end
 			if (ArcaniaShowMinimap == nil) then
