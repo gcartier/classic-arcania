@@ -383,23 +383,23 @@ end
 SLASH_AR1 = "/ar"
 SLASH_AR2 = "/arcania"
 SlashCmdList["AR"] = function(msg)
-	print("len " .. string.len(msg))
-end 
+		InterfaceOptionsFrame_OpenToCategory(ArcaniaOptions)
+	end
 
 SLASH_RL1 = "/rl"
 SlashCmdList["RL"] = function(msg)
-   ReloadUI()
-end
+		ReloadUI()
+	end
 
 SLASH_CL1 = "/cl"
 SlashCmdList["CL"] = function(msg)
-   ChatFrame1:Clear()
-end
+		ChatFrame1:Clear()
+	end
 
 SLASH_XP1 = "/xp"
 SlashCmdList["XP"] = function(msg)
-   xp()
-end
+		xp()
+	end
 
 --
 --- Welcome
