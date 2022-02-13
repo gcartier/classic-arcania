@@ -81,6 +81,7 @@ ArcaniaCooldowns = {
 	},
 	...
 }
+ArcaniaShowMinimap = true
 ]]
 
 --
@@ -101,7 +102,9 @@ local function UpdateWellness(unit, framename)
 					end
 				end
 				MainMenuExpBar:Show()
-				Minimap:Show()
+				if (ArcaniaShowMinimap) then
+					Minimap:Show()
+				end
 			end
 		else
 			local healthMax = UnitHealthMax(unit)
@@ -133,7 +136,9 @@ local function UpdateWellness(unit, framename)
 					end
 				end
 				MainMenuExpBar:Hide()
-				Minimap:Hide()
+				if (ArcaniaShowMinimap) then
+					Minimap:Hide()
+				end
 			else
 				frame:SetAlpha(.2 + wellnessAlpha * .8)
 			end
@@ -279,6 +284,9 @@ local function PlayerEvent(self, event, ...)
 			end
 			if (not ArcaniaCooldowns) then
 				ArcaniaCooldowns = {}
+			end
+			if (ArcaniaShowMinimap == nil) then
+				ArcaniaShowMinimap = false
 			end
 		end
 	elseif (event == "PLAYER_ENTERING_WORLD") then
