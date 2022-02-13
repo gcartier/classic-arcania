@@ -83,8 +83,6 @@ ArcaniaCooldowns = {
 }
 ]]
 
-local FriendlyTarget = false
-
 --
 --- Wellness
 --
@@ -94,7 +92,6 @@ local function UpdateWellness(unit, framename)
 	local frame = getglobal(framename)
 	if (frame) then
 		if (UnitExists("target") and UnitIsFriend("player","target")) then
-			FriendlyTarget = true
 			frame:SetAlpha(1)
 			if (unit == "player") then
 				for index, name in ipairs(ArcaniaFriendlyFrames) do
@@ -107,7 +104,6 @@ local function UpdateWellness(unit, framename)
 				Minimap:Show()
 			end
 		else
-			FriendlyTarget = false
 			local healthMax = UnitHealthMax(unit)
 			local health = UnitHealth(unit)
 			local healthAlpha = (healthMax - health) / healthMax
@@ -192,10 +188,10 @@ end
 --- Cooldown
 --
 
-local function UpdateCooldown(cooldown, spell)
+local function UpdateCooldown(cooldown, spell, friendlyTarget)
 	local start, duration, enabled = GetSpellCooldown(spell)
 	local button = cooldown:GetParent()
-	if (FriendlyTarget) then
+	if (friendlyTarget) then
 		button:SetAlpha(1)
 	elseif (duration < 2.0 or cooldown:GetCooldownDuration() == 0) then
 		button:SetAlpha(0)
@@ -205,12 +201,13 @@ local function UpdateCooldown(cooldown, spell)
 end
 
 local function MonitorCooldowns()
+	local friendlyTarget = UnitExists("target") and UnitIsFriend("player","target")
 	for index, cooldown in ipairs(ArcaniaCooldowns) do
 		local name = cooldown[1]
 		local spell = cooldown[2]
 		local button = getglobal(name)
 		if (button) then
-			UpdateCooldown(button, spell)
+			UpdateCooldown(button, spell, friendlyTarget)
 		end
 	end
 end
@@ -227,7 +224,6 @@ local function CheckDistance()
 	
 	if (UnitExists("target")) then
 		if (not UnitIsFriend("player","target")) then
-			FriendlyTarget = false
 			if (IsSpellInRange("Fire Blast", "target") == 1) then
 				local classif = UnitClassification("target")
 				if (classif == "worldboss" or classif == "rareelite" or classif == "elite" or classif == "rare") then
@@ -249,14 +245,12 @@ local function CheckDistance()
 				end
 			end
 		else
-			FriendlyTarget = true
 			getglobal(ArcaniaTargetFrame):SetAlpha(1)
 			if (range or UnitIsDeadOrGhost("target")) then
 				range:SetAlpha(0)
 			end
 		end
 	else
-		FriendlyTarget = false
 		if (range) then
 			range:SetAlpha(0)
 		end
