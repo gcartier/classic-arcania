@@ -45,23 +45,6 @@ lua supports inner functions
 ]]
 
 --
---- Version
---
-
-local WoWClassic = false
-local WoWTBC = false
-local WoWRetail = false
-local WoWVersion = select(4, GetBuildInfo())
-
-if WoWVersion < 20000 then
-	WoWClassic = true
-elseif WoWVersion < 30000 then 
-	WoWTBC = true
-else
-	WoWRetail = true
-end
-
---
 --- Variables
 --
 
@@ -83,6 +66,23 @@ ArcaniaCooldowns = {
 }
 ArcaniaShowMinimap = true
 ]]
+
+--
+--- Version
+--
+
+local WoWClassic = false
+local WoWTBC = false
+local WoWRetail = false
+local WoWVersion = select(4, GetBuildInfo())
+
+if WoWVersion < 20000 then
+	WoWClassic = true
+elseif WoWVersion < 30000 then 
+	WoWTBC = true
+else
+	WoWRetail = true
+end
 
 --
 --- Wellness
