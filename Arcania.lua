@@ -347,7 +347,14 @@ if (not WoWRetail) then
 end
 
 --
--- Slash
+--- XP
+--
+
+local function xp()
+end
+
+--
+--- Slash
 --
 
 SLASH_AR1 = "/ar"
@@ -364,6 +371,11 @@ end
 SLASH_CL1 = "/cl"
 SlashCmdList["CL"] = function(msg)
    ChatFrame1:Clear()
+end
+
+SLASH_XP1 = "/xp"
+SlashCmdList["XP"] = function(msg)
+   xp()
 end
 
 --
