@@ -7,7 +7,6 @@
 --[[
 - small delay for hiding the xp bar on quest complete
 - include details in it somehow
-- find the right way to show bar 2 and 10 in friendly
 - find the right way to implement friendly target
 - review the pet wellness code
 - pet bar
@@ -52,6 +51,10 @@ lua supports inner functions
 ArcaniaPlayerFrame = "framename"
 ArcaniaTargetFrame = "framename"
 ArcaniaMemberFrame = "framename"
+ArcaniaCooldownFrames = {
+	"framename",
+	...
+}
 ArcaniaFriendlyFrames = {
 	"framename",
 	...
@@ -92,9 +95,15 @@ local function UpdateWellness(unit, framename)
 	-- some frames are created lazily
 	local frame = getglobal(framename)
 	if (frame) then
-		if (UnitExists("target") and UnitIsFriend("player","target")) then
+		if (UnitExists("target") and UnitIsFriend("player", "target")) then
 			frame:SetAlpha(1)
 			if (unit == "player") then
+				for index, name in ipairs(ArcaniaCooldownFrames) do
+					local frame = getglobal(name)
+					if (frame) then
+						frame:SetClickThrough(false)
+					end
+				end
 				for index, name in ipairs(ArcaniaFriendlyFrames) do
 					local frame = getglobal(name)
 					if (frame) then
@@ -129,6 +138,12 @@ local function UpdateWellness(unit, framename)
 					wellnessAlpha = math.max(wellnessAlpha, petHealthAlpha)
 				end
 				frame:SetAlpha(wellnessAlpha)
+				for index, name in ipairs(ArcaniaCooldownFrames) do
+					local frame = getglobal(name)
+					if (frame) then
+						frame:SetClickThrough(true)
+					end
+				end
 				for index, name in ipairs(ArcaniaFriendlyFrames) do
 					local frame = getglobal(name)
 					if (frame) then
@@ -206,7 +221,7 @@ local function UpdateCooldown(cooldown, spell, friendlyTarget)
 end
 
 local function MonitorCooldowns()
-	local friendlyTarget = UnitExists("target") and UnitIsFriend("player","target")
+	local friendlyTarget = UnitExists("target") and UnitIsFriend("player", "target")
 	for index, cooldown in ipairs(ArcaniaCooldowns) do
 		local name = cooldown[1]
 		local spell = cooldown[2]
@@ -228,7 +243,7 @@ local function CheckDistance()
 	end
 	
 	if (UnitExists("target")) then
-		if (not UnitIsFriend("player","target")) then
+		if (not UnitIsFriend("player", "target")) then
 			if (IsSpellInRange("Fire Blast", "target") == 1) then
 				local classif = UnitClassification("target")
 				if (classif == "worldboss" or classif == "rareelite" or classif == "elite" or classif == "rare") then
@@ -299,6 +314,9 @@ local function PlayerEvent(self, event, ...)
 			end
 			if (ArcaniaMemberFrame == nil) then
 				ArcaniaMemberFrame = "PartyMemberFrame"
+			end
+			if (ArcaniaCooldownFrames == nil) then
+				ArcaniaCooldownFrames = {}
 			end
 			if (ArcaniaFriendlyFrames == nil) then
 				ArcaniaFriendlyFrames = {}
