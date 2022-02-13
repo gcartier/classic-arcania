@@ -60,14 +60,7 @@ ArcaniaFriendlyBars = {
 	...
 }
 ArcaniaRangeButton = "buttonname"
-ArcaniaCooldowns = {
-	{
-		"btcooldown",
-		"spellname"
-	},
-	...
-}
-ArcaniaShowMinimap = true
+ArcaniaShowMinimap = <boolean>
 ]]
 
 --
@@ -208,12 +201,12 @@ end
 --- Cooldown
 --
 
-local function UpdateCooldown(cooldown, spell, friendlyTarget)
-	local start, duration, enabled = GetSpellCooldown(spell)
-	local button = cooldown:GetParent()
+local function UpdateCooldown(button, friendlyTarget)
+	local cooldown = button.cooldown
+	local start, duration = cooldown:GetCooldownTimes()
 	if (friendlyTarget) then
 		button:SetAlpha(1)
-	elseif (duration < 2.0 or cooldown:GetCooldownDuration() == 0) then
+	elseif (duration < 2000 or cooldown:GetCooldownDuration() == 0) then
 		button:SetAlpha(0)
 	else
 		button:SetAlpha(1)
@@ -222,12 +215,14 @@ end
 
 local function MonitorCooldowns()
 	local friendlyTarget = UnitExists("target") and UnitIsFriend("player", "target")
-	for index, cooldown in ipairs(ArcaniaCooldowns) do
-		local name = cooldown[1]
-		local spell = cooldown[2]
-		local button = getglobal(name)
-		if (button) then
-			UpdateCooldown(button, spell, friendlyTarget)
+	for index, name in ipairs(ArcaniaCooldownBars) do
+		local bar = getglobal(name)
+		if (bar) then
+			for _, button in bar:GetAll() do
+				if (button:HasAction()) then
+					UpdateCooldown(button, friendlyTarget)
+				end
+			end
 		end
 	end
 end
@@ -320,9 +315,6 @@ local function PlayerEvent(self, event, ...)
 			end
 			if (ArcaniaFriendlyBars == nil) then
 				ArcaniaFriendlyBars = {}
-			end
-			if (ArcaniaCooldowns == nil) then
-				ArcaniaCooldowns = {}
 			end
 			if (ArcaniaShowMinimap == nil) then
 				ArcaniaShowMinimap = false

@@ -2,6 +2,6 @@
 ## Title: Arcania
 ## Author: Zaele
 ## Version: 1.0
-## SavedVariablesPerCharacter: ArcaniaPlayerFrame, ArcaniaTargetFrame, ArcaniaMemberFrame, ArcaniaCooldownBars, ArcaniaFriendlyBars, ArcaniaRangeButton, ArcaniaCooldowns, ArcaniaShowMinimap
+## SavedVariablesPerCharacter: ArcaniaPlayerFrame, ArcaniaTargetFrame, ArcaniaMemberFrame, ArcaniaCooldownBars, ArcaniaFriendlyBars, ArcaniaRangeButton, ArcaniaShowMinimap
 
 Arcania.lua
