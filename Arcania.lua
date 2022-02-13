@@ -263,6 +263,27 @@ local function CheckDistance()
 end
 
 --
+--- Options
+--
+
+local function SetupOptions()
+	local panel = CreateFrame("Frame")
+	panel.name = "Arcania"
+
+	local cb = CreateFrame("CheckButton", nil, panel, "InterfaceOptionsCheckButtonTemplate")
+	cb:SetPoint("TOPLEFT", 20, -20)
+	cb.Text:SetText("Show Minimap")
+	cb:SetChecked(ArcaniaShowMinimap)
+	cb:SetScript("OnClick", function()
+		ArcaniaShowMinimap = cb:GetChecked()
+	end)
+
+	ArcaniaOptions = panel
+
+	InterfaceOptions_AddCategory(panel)
+end
+
+--
 --- Event
 --
 
@@ -288,6 +309,8 @@ local function PlayerEvent(self, event, ...)
 			if (ArcaniaShowMinimap == nil) then
 				ArcaniaShowMinimap = false
 			end
+
+			SetupOptions()
 		end
 	elseif (event == "PLAYER_ENTERING_WORLD") then
 		Minimap:Hide()
