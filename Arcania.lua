@@ -263,7 +263,7 @@ local function CheckDistance()
 end
 
 --
--- Event
+--- Event
 --
 
 local function PlayerEvent(self, event, ...)
@@ -311,7 +311,7 @@ local function PlayerEvent(self, event, ...)
 end
 
 --
--- Update
+--- Update
 --
 
 local timer = 0
@@ -327,7 +327,7 @@ local function Update(_, elapsed)
 end
 
 --
--- Frame
+--- Frame
 --
 
 if (not WoWRetail) then
@@ -367,7 +367,7 @@ SlashCmdList["CL"] = function(msg)
 end
 
 --
--- Welcome
+--- Welcome
 --
 
 if (WoWClassic) then
