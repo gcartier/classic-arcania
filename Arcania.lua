@@ -51,12 +51,12 @@ lua supports inner functions
 ArcaniaPlayerFrame = "framename"
 ArcaniaTargetFrame = "framename"
 ArcaniaMemberFrame = "framename"
-ArcaniaCooldownFrames = {
-	"framename",
+ArcaniaCooldownBars = {
+	"barname",
 	...
 }
-ArcaniaFriendlyFrames = {
-	"framename",
+ArcaniaFriendlyBars = {
+	"barname",
 	...
 }
 ArcaniaRangeButton = "buttonname"
@@ -98,16 +98,16 @@ local function UpdateWellness(unit, framename)
 		if (UnitExists("target") and UnitIsFriend("player", "target")) then
 			frame:SetAlpha(1)
 			if (unit == "player") then
-				for index, name in ipairs(ArcaniaCooldownFrames) do
-					local frame = getglobal(name)
-					if (frame) then
-						frame:SetClickThrough(false)
+				for index, name in ipairs(ArcaniaCooldownBars) do
+					local bar = getglobal(name)
+					if (bar) then
+						bar:SetClickThrough(false)
 					end
 				end
-				for index, name in ipairs(ArcaniaFriendlyFrames) do
-					local frame = getglobal(name)
-					if (frame) then
-						frame:SetAlpha(1)
+				for index, name in ipairs(ArcaniaFriendlyBars) do
+					local bar = getglobal(name)
+					if (bar) then
+						bar:SetAlpha(1)
 					end
 				end
 				MainMenuExpBar:Show()
@@ -138,16 +138,16 @@ local function UpdateWellness(unit, framename)
 					wellnessAlpha = math.max(wellnessAlpha, petHealthAlpha)
 				end
 				frame:SetAlpha(wellnessAlpha)
-				for index, name in ipairs(ArcaniaCooldownFrames) do
-					local frame = getglobal(name)
-					if (frame) then
-						frame:SetClickThrough(true)
+				for index, name in ipairs(ArcaniaCooldownBars) do
+					local bar = getglobal(name)
+					if (bar) then
+						bar:SetClickThrough(true)
 					end
 				end
-				for index, name in ipairs(ArcaniaFriendlyFrames) do
-					local frame = getglobal(name)
-					if (frame) then
-						frame:SetAlpha(0)
+				for index, name in ipairs(ArcaniaFriendlyBars) do
+					local bar = getglobal(name)
+					if (bar) then
+						bar:SetAlpha(0)
 					end
 				end
 				MainMenuExpBar:Hide()
@@ -315,11 +315,11 @@ local function PlayerEvent(self, event, ...)
 			if (ArcaniaMemberFrame == nil) then
 				ArcaniaMemberFrame = "PartyMemberFrame"
 			end
-			if (ArcaniaCooldownFrames == nil) then
-				ArcaniaCooldownFrames = {}
+			if (ArcaniaCooldownBars == nil) then
+				ArcaniaCooldownBars = {}
 			end
-			if (ArcaniaFriendlyFrames == nil) then
-				ArcaniaFriendlyFrames = {}
+			if (ArcaniaFriendlyBars == nil) then
+				ArcaniaFriendlyBars = {}
 			end
 			if (ArcaniaCooldowns == nil) then
 				ArcaniaCooldowns = {}
