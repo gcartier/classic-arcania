@@ -1,0 +1,11 @@
+<Bindings>
+	<Binding name="Toggle Compass" header="ARCANIA_CAMERA" category="Arcania">
+		ToggleCompass()
+	</Binding>
+	<Binding name="Toggle Mouse Look" category="Arcania">
+		ToggleMouseLook()
+	</Binding>
+	<Binding name="Toggle Quest Tracker" header="ARCANIA_QUEST" category="Arcania">
+		ToggleQuestTracker()
+	</Binding>
+</Bindings>

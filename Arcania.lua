@@ -61,6 +61,8 @@ ArcaniaFriendlyBars = {
 }
 ArcaniaRangeButton = "buttonname"
 ArcaniaShowMinimap = <boolean>
+ArcaniaShowQuestTracker = <boolean>
+ArcaniaShowCompass = <boolean>
 ]]
 
 --
@@ -88,25 +90,29 @@ local function UpdateWellness(unit, framename)
 	-- some frames are created lazily
 	local frame = getglobal(framename)
 	if (frame) then
-		if (UnitExists("target") and UnitIsFriend("player", "target")) then
+		if (UnitExists("target") and UnitIsPlayer("target")) then
 			frame:SetAlpha(1)
-			if (unit == "player") then
-				for index, name in ipairs(ArcaniaCooldownBars) do
-					local bar = getglobal(name)
-					if (bar) then
-						bar:SetClickThrough(false)
-					end
+			for index, name in ipairs(ArcaniaCooldownBars) do
+				local bar = getglobal(name)
+				if (bar) then
+					bar:SetClickThrough(false)
 				end
-				for index, name in ipairs(ArcaniaFriendlyBars) do
-					local bar = getglobal(name)
-					if (bar) then
-						bar:SetAlpha(1)
-					end
+			end
+			for index, name in ipairs(ArcaniaFriendlyBars) do
+				local bar = getglobal(name)
+				if (bar) then
+					bar:SetAlpha(1)
 				end
-				MainMenuExpBar:Show()
-				if (ArcaniaShowMinimap) then
-					Minimap:Show()
-				end
+			end
+			if (ArcaniaShowQuestTracker) then
+				ObjectiveTrackerFrame:Show()
+			end
+			if (ArcaniaShowCompass) then
+				Compass:Show()
+			end
+			BT4StatusBarTrackingManager:Show()
+			if (ArcaniaShowMinimap) then
+				Minimap:Show()
 			end
 		else
 			local healthMax = UnitHealthMax(unit)
@@ -143,7 +149,13 @@ local function UpdateWellness(unit, framename)
 						bar:SetAlpha(0)
 					end
 				end
-				MainMenuExpBar:Hide()
+				if (ArcaniaShowQuestTracker) then
+					ObjectiveTrackerFrame:Hide()
+				end
+				if (ArcaniaShowCompass) then
+					Compass:Hide()
+				end
+				BT4StatusBarTrackingManager:Hide()
 				if (ArcaniaShowMinimap) then
 					Minimap:Hide()
 				end
@@ -201,10 +213,10 @@ end
 --- Cooldown
 --
 
-local function UpdateCooldown(button, friendlyTarget)
+local function UpdateCooldown(button, selfTarget)
 	local cooldown = button.cooldown
 	local start, duration = cooldown:GetCooldownTimes()
-	if (friendlyTarget) then
+	if (selfTarget) then
 		button:SetAlpha(1)
 	elseif (duration < 2000 or cooldown:GetCooldownDuration() == 0) then
 		button:SetAlpha(0)
@@ -214,13 +226,13 @@ local function UpdateCooldown(button, friendlyTarget)
 end
 
 local function MonitorCooldowns()
-	local friendlyTarget = UnitExists("target") and UnitIsFriend("player", "target")
+	local selfTarget = UnitExists("target") and UnitIsPlayer("target")
 	for index, name in ipairs(ArcaniaCooldownBars) do
 		local bar = getglobal(name)
 		if (bar) then
 			for _, button in bar:GetAll() do
 				if (button:HasAction()) then
-					UpdateCooldown(button, friendlyTarget)
+					UpdateCooldown(button, selfTarget)
 				end
 			end
 		end
@@ -239,7 +251,7 @@ local function CheckDistance()
 	
 	if (UnitExists("target")) then
 		if (not UnitIsFriend("player", "target")) then
-			if (IsSpellInRange("Fire Blast", "target") == 1) then
+			if (IsSpellInRange("Torment", "target") == 1) then
 				local classif = UnitClassification("target")
 				if (classif == "worldboss" or classif == "rareelite" or classif == "elite" or classif == "rare") then
 					getglobal(ArcaniaTargetFrame):SetAlpha(1)
@@ -277,6 +289,38 @@ local function CheckDistance()
 end
 
 --
+--- Camera
+--
+
+function ToggleCompass()
+	if IsCompassVisible() then
+		HideCompass()
+	else
+		ShowCompass()
+	end
+end
+
+function ToggleMouseLook()
+	if not IsMouselooking() then
+		MouselookStart()
+	else
+		MouselookStop()
+	end
+end
+
+--
+--- Quest
+--
+
+function ToggleQuestTracker()
+	if ObjectiveTrackerFrame:IsVisible() then
+		ObjectiveTrackerFrame:Hide()
+	else
+		ObjectiveTrackerFrame:Show()
+	end
+end
+
+--
 --- Options
 --
 
@@ -292,14 +336,41 @@ local function SetupOptions()
 		ArcaniaShowMinimap = cb:GetChecked()
 	end)
 
+	cb = CreateFrame("CheckButton", nil, panel, "InterfaceOptionsCheckButtonTemplate")
+	cb:SetPoint("TOPLEFT", 20, -50)
+	cb.Text:SetText("Show Quest Tracker")
+	cb:SetChecked(ArcaniaShowQuestTracker)
+	cb:SetScript("OnClick", function()
+		ArcaniaShowQuestTracker = cb:GetChecked()
+	end)
+
+	cb = CreateFrame("CheckButton", nil, panel, "InterfaceOptionsCheckButtonTemplate")
+	cb:SetPoint("TOPLEFT", 20, -80)
+	cb.Text:SetText("Show Compass")
+	cb:SetChecked(ArcaniaShowCompass)
+	cb:SetScript("OnClick", function()
+		ArcaniaShowCompass = cb:GetChecked()
+	end)
+
 	ArcaniaOptions = panel
 
 	InterfaceOptions_AddCategory(panel)
 end
 
 --
+--- Bindings
+--
+
+local function SetupKeyBindings()
+	BINDING_HEADER_ARCANIA_CAMERA = "Camera"
+	BINDING_HEADER_ARCANIA_QUEST = "Quest"
+end
+
+--
 --- Event
 --
+
+local sfxVolume
 
 local function PlayerEvent(self, event, ...)
 	if (event == "ADDON_LOADED") then
@@ -323,25 +394,52 @@ local function PlayerEvent(self, event, ...)
 			if (ArcaniaShowMinimap == nil) then
 				ArcaniaShowMinimap = false
 			end
+			if (ArcaniaShowQuestTracker == nil) then
+				ArcaniaShowQuestTracker = false
+			end
+			if (ArcaniaShowCompass == nil) then
+				ArcaniaShowCompass = false
+			end
 
 			SetupOptions()
+			SetupKeyBindings()
 		end
 	elseif (event == "PLAYER_ENTERING_WORLD") then
 		Minimap:Hide()
-		C_Timer.After(5, function() MainMenuExpBar:Hide() end)
+		Compass:Hide()
+		ObjectiveTrackerFrame:Hide()
+		C_Timer.After(5, function()
+			BT4StatusBarTrackingManager:Hide()
+		end)
 		CompactRaidFrameManager:Hide()
 		RegisterWellness("player", ArcaniaPlayerFrame)
 		RegisterWellness("pet", ArcaniaPlayerFrame)
 		RegisterPartyWellness()
+	elseif (event == "PLAYER_REGEN_ENABLED") then
+		if sfxVolume then
+			SetCVar("Sound_SFXVolume", sfxVolume)
+		end
+	elseif (event == "PLAYER_REGEN_DISABLED") then
+		sfxVolume = GetCVar("Sound_SFXVolume")
+		SetCVar("Sound_SFXVolume", sfxVolume / 2)
 	elseif (event == "PLAYER_TARGET_CHANGED") then
 		UpdateWellness("player", ArcaniaPlayerFrame)
 		UpdatePartyWellness()
 	elseif (event == "GROUP_ROSTER_UPDATE") then
 		RegisterPartyWellness()
-	elseif (event == "QUEST_DETAIL") then
-		MainMenuExpBar:Show()
-	elseif (event == "QUEST_FINISHED") then
-		MainMenuExpBar:Hide()
+	-- elseif (event == "QUEST_DETAIL") then
+	-- 	MainMenuExpBar:Show()
+	-- elseif (event == "QUEST_FINISHED") then
+	-- 	MainMenuExpBar:Hide()
+	-- elseif (event == "UNIT_SPELLCAST_SUCCEEDED") then
+	-- 	local arg1, arg2, arg3 = ...
+	-- 	local lowered = "Interface\\AddOns\\Arcania\\lowered\\"
+	-- 	print(arg3)
+	-- 	if arg3 == 195072 then
+	-- 		PlaySoundFile(lowered .. "Spell_DH_FelRush_Cast_0" .. math.random(3) .. ".ogg")
+	-- 	elseif arg3 == 162243 then
+	-- 		PlaySoundFile(lowered .. "Spell_DH_DemonBite_Cast_0" .. math.random(5) .. ".ogg")
+	-- 	end
 	end
 
 	MonitorCooldowns()
@@ -367,20 +465,47 @@ end
 --- Frame
 --
 
-if (not WoWRetail) then
-	local updateFrame = CreateFrame("frame")
-	updateFrame:SetScript("OnUpdate", Update)
+local updateFrame = CreateFrame("frame")
+updateFrame:SetScript("OnUpdate", Update)
 
-	local playerFrame = CreateFrame("frame")
-	playerFrame:RegisterEvent("ADDON_LOADED")
-	playerFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-	playerFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-	playerFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
-	playerFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
-	playerFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
-	playerFrame:RegisterEvent("QUEST_DETAIL")
-	playerFrame:RegisterEvent("QUEST_FINISHED")
-	playerFrame:SetScript("OnEvent", PlayerEvent)
+local playerFrame = CreateFrame("frame")
+playerFrame:RegisterEvent("ADDON_LOADED")
+playerFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+playerFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+playerFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+playerFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
+playerFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+playerFrame:RegisterEvent("QUEST_DETAIL")
+playerFrame:RegisterEvent("QUEST_FINISHED")
+playerFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+playerFrame:SetScript("OnEvent", PlayerEvent)
+
+-- felrush
+-- MuteSoundFile(1361050)
+-- MuteSoundFile(1361051)
+-- MuteSoundFile(1361052)
+-- demonbite
+-- MuteSoundFile(1278546)
+-- MuteSoundFile(1278547)
+-- MuteSoundFile(1278548)
+-- MuteSoundFile(1278549)
+-- MuteSoundFile(1278550)
+
+--
+--- Debug
+--
+
+function dump(o)
+   if type(o) == 'table' then
+      local s = '{ '
+      for k,v in pairs(o) do
+         if type(k) ~= 'number' then k = '"'..k..'"' end
+         s = s .. '['..k..'] = ' .. tostring(v) .. ','
+      end
+      return s .. '} '
+   else
+      return tostring(o)
+   end
 end
 
 --
@@ -388,7 +513,49 @@ end
 --
 
 local function xp()
+--[[
+	for i=1,10 do
+		local unitid = "nameplate" .. tostring(i)
+		local plate = C_NamePlate.GetNamePlateForUnit(unitid)
+		if not plate then
+			return
+		end
+		local isTarget = UnitIsUnit("target", unitid)
+		local inCombat = UnitAffectingCombat(unitid)
+		local target = isTarget and " target" or ""
+		local combat = inCombat and " combat" or ""
+		print(unitid .. target .. combat)
+	end
+]]
+	local GetNumQuestLogEntries = C_QuestLog.GetNumQuestLogEntries
+	local GetQuestLogTitle = C_QuestLog.GetTitleForLogIndex
+	local numQuests = GetNumQuestLogEntries();
+	for i = 1, numQuests do
+		local info = C_QuestLog.GetInfo(i)
+		local questID = info["questID"]
+		print(questID)
+		-- local _, x, y = QuestPOIGetIconInfo(questID);
+	end
+--[[
+	local questID = C_SuperTrack.GetSuperTrackedQuestID()
+	if questID then
+		print(C_QuestLog.GetTitleForQuestID(questID))
+		print(GetQuestExpansion(questID))
+		print(GetQuestUiMapID(questID))
+		completed, posX, posY, objective = QuestPOIGetIconInfo(questID)
+		print(posX)
+		print(posY)
+		print(objective)
+		print(C_QuestLog.GetLogIndexForQuestID(questID))
+		distanceSq, onContinent = C_QuestLog.GetDistanceSqToQuest(questID)
+		print(distanceSq)
+	end
+]]
 end
+
+-- /run PlaySoundFile(1361050)
+-- /run PlaySoundFile("Interface\\AddOns\\Arcania\\sound\\spells\\spell_dh_felrush_cast_01.ogg")
+-- /run PlaySoundFile("Interface\\AddOns\\Arcania\\lowered\\spell_dh_felrush_cast_01.ogg")
 
 --
 --- Slash
@@ -424,5 +591,5 @@ if (WoWClassic) then
 elseif (WoWTBC) then
 	print('Arcania TBC ready!')
 else
-	print("Arcania not yet supported in Retail")
+	print('Arcania Retail ready!')
 end
